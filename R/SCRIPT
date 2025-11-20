@@ -162,7 +162,7 @@ complexity_prezzo=function(mtrain_prezzo){length(coef(mtrain_prezzo))-1}
 comp<-complexity_prezzo(mtrain_prezzo)
 comp
 
-#aumentiamo la complessit‡ con interazioni e polinomi
+#aumentiamo la complessit√† con interazioni e polinomi
 
 
 
@@ -237,10 +237,10 @@ confronto
 
 plot(complexity, mse_TEST, type = "b", col="3",
      ylim=c(min(mse_TEST, mse_TRAIN)-0.05, max(mse_TEST, mse_TRAIN)+0.05),
-     xlab = "Complessit‡", ylab = "MSE",
+     xlab = "Complessit√†", ylab = "MSE",
      main = "MSE per training set (red) e test set (green)")
 lines(complexity, mse_TRAIN, type = "b", col = "2")
-#### all'aumentare della complessit‡ mse_Test diminusisce, anche Train_Set.
+#### all'aumentare della complessit√† mse_Test diminusisce, anche Train_Set.
 
 
 ##### APPLICHIAMO TECHICHE DI REGOLARIZZAZIONE ######
@@ -285,7 +285,7 @@ min(ddKfold) #23.51736 -> modello 3
 
 plot(complexity, ddLOOCV[1,], type = "b", col="red",
      ylim=c(min(ddLOOCV[1,], ddKfold[1,])-0.05, max(ddLOOCV[1,], ddKfold[1,])+0.05),
-     xlab = "Complessit‡", ylab = "MSE",
+     xlab = "Complessit√†", ylab = "MSE",
      main = "MSE con LOOCV (red) e con k-foldCV (green)")
 lines(complexity,ddKfold[1,], type = "b", col = "blue")
 
