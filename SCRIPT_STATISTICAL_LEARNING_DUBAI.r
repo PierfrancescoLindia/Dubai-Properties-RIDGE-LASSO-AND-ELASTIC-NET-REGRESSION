@@ -1,0 +1,441 @@
+data<-properties_data
+
+data
+
+id<-data[,1]
+
+luogo<-data[,2]
+luogo<-ifelse(luogo=="Downtown Dubai",0,ifelse(luogo=="Dubai Marina",1,2))
+
+latitudine<-data[,3]
+longitudine<-data[,4]
+prezzo<-data[,5]
+grandezza_mq<-data[,6]
+prezzo_mq<-data[,7]
+no_stanza<-data[,8]
+no_bagni<-data[,9]
+
+qualita<-data[,10]
+qualita<-ifelse(qualita=="Medium",0,ifelse(qualita=="Low",1,2))
+
+cam_serv<-data[,11]
+cam_serv<-ifelse(cam_serv=="FALSE",0,1)
+ 
+no_mob<-data[,12]
+no_mob<-ifelse(no_mob=="FALSE",0,1)
+
+balcone<-data[,13]
+balcone<-ifelse(balcone=="FALSE",0,1)
+
+barbecue<-data[,14]
+barbecue<-ifelse(barbecue=="FALSE",0,1)
+
+armadi<-data[,15]
+armadi<-ifelse(armadi=="FALSE",0,1)
+
+area_cod<-data[,16]
+area_cod<-ifelse(area_cod=="FALSE",0,1)
+
+area_baby<-data[,17]
+area_baby<-ifelse(area_baby=="FALSE",0,1)
+
+piscina_baby<-data[,18]
+piscina_baby<-ifelse(piscina_baby=="FALSE",0,1)
+
+portiere<-data[,19]
+portiere<-ifelse(portiere=="FALSE",0,1)
+
+parch_cop<-data[,20]
+parch_cop<-ifelse(parch_cop=="FALSE",0,1)
+
+cucina<-data[,21]
+cucina<-ifelse(cucina=="FALSE",0,1)
+
+atrio<-data[,22]
+atrio<-ifelse(atrio=="FALSE",0,1)
+
+pulizia<-data[,23]
+pulizia<-ifelse(pulizia=="FALSE",0,1)
+
+connessione<-data[,24]
+connessione<-ifelse(connessione=="FALSE",0,1)
+
+animali<-data[,25]
+animali<-ifelse(animali=="FALSE",0,1)
+
+giard<-data[,26]
+giard<-ifelse(giard=="FALSE",0,1)
+
+palestra_priv<-data[,27]
+palestra_priv<-ifelse(palestra_priv=="FALSE",0,1)
+
+jacuzzi<-data[,28]
+jacuzzi<-ifelse(jacuzzi=="FALSE",0,1)
+
+piscina_priv<-data[,29]
+piscina_priv<-ifelse(piscina_priv=="FALSE",0,1)
+
+sicurezza<-data[,30]
+sicurezza<-ifelse(sicurezza=="FALSE",0,1)
+
+palestra<-data[,31]
+palestra<-ifelse(palestra=="FALSE",0,1)
+
+piscina_cond<-data[,32]
+piscina_cond<-ifelse(piscina_cond=="FALSE",0,1)
+
+spa_cond<-data[,33]
+spa_cond<-ifelse(spa_cond=="FALSE",0,1)
+
+studio<-data[,34]
+studio<-ifelse(studio=="FALSE",0,1)
+
+vastu<-data[,35]
+vastu<-ifelse(vastu=="FALSE",0,1)
+
+punto_rif<-data[,36]
+punto_rif<-ifelse(punto_rif=="FALSE",0,1)
+
+vista_acqua<-data[,37]
+vista_acqua<-ifelse(vista_acqua=="FALSE",0,1)
+
+cab_arm<-data[,38]
+cab_arm<-ifelse(cab_arm=="FALSE",0,1)
+
+data1<-data.frame(id, luogo, latitudine,longitudine,prezzo, grandezza_mq,prezzo_mq,no_stanza,no_bagni, qualita,
+                  cam_serv,no_mob, balcone, barbecue, armadi, area_cod, area_baby, piscina_baby, portiere,
+                  parch_cop, cucina,atrio, pulizia, connessione, animali, giard, palestra_priv, jacuzzi,
+                  piscina_priv, sicurezza, palestra, piscina_cond, spa_cond, studio, vastu, punto_rif, vista_acqua,
+                  cab_arm)
+
+data1
+
+
+
+cor(data1) #3 valori 0.8
+
+
+pairs(data1[,c(1,2,3,4,5,6,7,8,9,10,11,12)])
+pairs(data1[,c(13,14,15,16,17,18,19,20,21,22,23,24)])
+pairs(data1[,c(25,26,27,28,29,30,31,32,33,34,35,36,37,38)])            
+
+
+
+
+m1<-lm(price~., data=data1)
+summary(m1)
+
+#SPLIT DATA SET
+
+#trainset
+set.seed(100)
+index=sample(1:nrow(data1), 0.7*nrow(data1))
+
+train_prezzo<-data1[index,]
+test_prezzo<-data1[-index,]
+
+dim(train_prezzo)
+dim(test_prezzo)
+
+
+mtrain_prezzo<-lm(price~., data=data1)
+summary(mtrain_prezzo)
+
+mse=function(actual, predicted){mean((actual-predicted)^2)}
+rmse=function(actual, predicted){sqrt(mean((actual-predicted)^2))}
+
+
+
+mseTRAIN<-mse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo,train_prezzo))
+mseTRAIN
+rmseTRAIN<-rmse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo,train_prezzo))
+rmseTRAIN
+
+mseTEST<-mse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo,test_prezzo))
+mseTEST
+rmseTEST<-rmse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo,test_prezzo))
+rmseTEST
+
+
+
+complexity_prezzo=function(mtrain_prezzo){length(coef(mtrain_prezzo))-1}
+comp<-complexity_prezzo(mtrain_prezzo)
+comp
+
+#aumentiamo la complessità con interazioni e polinomi
+
+
+
+mtrain_prezzo1<-lm(price~.+latitude*longitude, data=data1)
+comp1<-complexity_prezzo(mtrain_prezzo1)
+comp1
+
+mseTRAIN1<-mse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo1,train_prezzo))
+mseTRAIN1
+rmseTRAIN1<-rmse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo1,train_prezzo))
+rmseTRAIN1
+
+mseTEST1<-mse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo1,test_prezzo))
+mseTEST1
+rmseTEST1<-rmse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo1,test_prezzo))
+rmseTEST1
+
+
+mtrain_prezzo2<-lm(price~.+latitude*longitude+size_in_sqft*price_per_sqft, data=data1)
+comp2<-complexity_prezzo(mtrain_prezzo2)
+comp2
+
+mseTRAIN2<-mse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo2,train_prezzo))
+mseTRAIN2
+rmseTRAIN2<-rmse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo2,train_prezzo))
+rmseTRAIN2
+
+mseTEST2<-mse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo2,test_prezzo))
+mseTEST2
+rmseTEST2<-rmse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo2,test_prezzo))
+rmseTEST2
+
+
+mtrain_prezzo3<-lm(price~.+latitude*longitude+size_in_sqft*price_per_sqft+poly(latitude,2)-latitude, data=data1)
+comp3<-complexity_prezzo(mtrain_prezzo3)
+comp3
+
+mseTRAIN3<-mse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo3,train_prezzo))
+mseTRAIN3
+rmseTRAIN3<-rmse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo3,train_prezzo))
+rmseTRAIN3
+
+mseTEST3<-mse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo3,test_prezzo))
+mseTEST3
+rmseTEST3<-rmse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo3,test_prezzo))
+rmseTEST3
+
+
+mtrain_prezzo4<-lm(price~.+latitude*longitude+size_in_sqft*price_per_sqft+poly(latitude,2)-latitude+poly(longitude,2)-longitude, data=data1)
+comp4<-complexity_prezzo(mtrain_prezzo4)
+comp4
+
+mseTRAIN4<-mse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo4,train_prezzo))
+mseTRAIN4
+rmseTRAIN4<-rmse(actual=train_prezzo$price, predicted=predict(mtrain_prezzo4,train_prezzo))
+rmseTRAIN4
+
+mseTEST4<-mse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo4,test_prezzo))
+mseTEST4
+rmseTEST4<-rmse(actual=test_prezzo$price, predicted=predict(mtrain_prezzo4,test_prezzo))
+rmseTEST4
+
+
+
+lista<-list("mtrain_prezzo","mtrain_prezzo1", "mtrain_prezzo2" ,"mtrain_prezzo3", "mtrain_prezzo4")
+complexity<-c(comp, comp1,comp2,comp3,comp4)
+mse_TRAIN<-c(mseTRAIN, mseTRAIN1, mseTRAIN2, mseTRAIN3, mseTRAIN4)
+mse_TEST<-c(mseTEST,mseTEST1, mseTEST2,mseTEST3, mseTEST4)
+
+confronto<-cbind(lista, complexity, mse_TRAIN, mse_TEST)
+confronto
+
+plot(complexity, mse_TEST, type = "b", col="3",
+     ylim=c(min(mse_TEST, mse_TRAIN)-0.05, max(mse_TEST, mse_TRAIN)+0.05),
+     xlab = "Complessità", ylab = "MSE",
+     main = "MSE per training set (red) e test set (green)")
+lines(complexity, mse_TRAIN, type = "b", col = "2")
+#### all'aumentare della complessità mse_Test diminusisce, anche Train_Set.
+
+
+##### APPLICHIAMO TECHICHE DI REGOLARIZZAZIONE ######
+
+
+#LOOCV k-fold
+
+library(boot)
+m0glm<-glm(price~., data=data1)
+m1glm<-glm(price~.+latitude*longitude, data=data1)
+m2glm<-glm(price~.+latitude*longitude+size_in_sqft*price_per_sqft, data=data1)
+m3glm<-glm(price~.+latitude*longitude+size_in_sqft*price_per_sqft+poly(latitude,2)-latitude, data=data1)
+m4glm<-glm(price~.+latitude*longitude+size_in_sqft*price_per_sqft+poly(latitude,2)-latitude+poly(longitude,2)-longitude, data=data1)
+
+
+n<-nrow(data1)
+cv.errorL0<-cv.glm(data1,m0glm, K=n)$delta
+cv.errorL1<-cv.glm(data1,m1glm, K=n)$delta
+cv.errorL2<-cv.glm(data1,m2glm, K=n)$delta
+cv.errorL3<-cv.glm(data1,m3glm, K=n)$delta
+cv.errorL4<-cv.glm(data1,m4glm, K=n)$delta
+
+ddLOOCV<-cbind(cv.errorL0, cv.errorL1, cv.errorL2, cv.errorL3, cv.errorL4)
+ddLOOCV
+
+
+set.seed(17112021)
+cv.errorK0<-cv.glm(data1,m0glm, K=10)$delta
+cv.errorK1<-cv.glm(data1,m1glm, K=10)$delta
+cv.errorK2<-cv.glm(data1,m2glm, K=10)$delta
+cv.errorK3<-cv.glm(data1,m3glm, K=10)$delta
+cv.errorK4<-cv.glm(data1,m4glm, K=10)$delta
+ddKfold<-cbind(cv.errorK0, cv.errorK1, cv.errorK2, cv.errorK3, cv.errorK4)
+ddKfold
+
+confronto1<-cbind(ddLOOCV, ddKfold)
+confronto1 #guardare valore riga 1
+
+min(ddLOOCV) #23.60254 -> modello 4
+min(ddKfold) #23.51736 -> modello 3
+
+
+plot(complexity, ddLOOCV[1,], type = "b", col="red",
+     ylim=c(min(ddLOOCV[1,], ddKfold[1,])-0.05, max(ddLOOCV[1,], ddKfold[1,])+0.05),
+     xlab = "Complessità", ylab = "MSE",
+     main = "MSE con LOOCV (red) e con k-foldCV (green)")
+lines(complexity,ddKfold[1,], type = "b", col = "blue")
+
+
+
+#### SCELTA DEL LAMBDA ###
+
+library(glmnet)
+names(data1)
+xx<-data1[,-5]
+x<-as.matrix(xx)
+dim(x) 
+names(x)
+y<-data1$price
+
+#RIDGE -> USIAMO GRIGLIA DI DEFAULT
+#qq<-seq(10,-2, length=100)
+#griglia=10^seq(qq)
+
+ridge.mods.ALL=glmnet(x,y,alpha=0, lambda=NULL)
+dim(coef(ridge.mods.ALL))
+
+plot(ridge.mods.ALL, main="Ridge Regression; regressoristandardizzati",xvar="lambda", label=TRUE)
+
+
+
+cv.outK10<-cv.glmnet(x,y,lambda=NULL, alpha=0)
+plot(cv.outK10)
+bestLambda<-cv.outK10$lambda.min
+bestLambda
+
+
+
+#best lambda con MSE minimo per stimanre modello 
+ridge.mod.kCV=glmnet(x,y,alpha=0, lambda = bestLambda) 
+coef(ridge.mod.kCV)[,1]
+#min(coef(ridge.mod.kCV)[,1])
+
+
+#VDEDIAMO CON LA loocv
+
+cv.outLOOCV=cv.glmnet(x,y,lambda=NULL, nfolds=n, grouped=FALSE, alpha=0)
+plot(cv.outLOOCV, main="LOOCV per Properties")
+
+bestLambdaLOOCV<-cv.outLOOCV$lambda.min
+bestLambdaLOOCV
+
+
+ridge.mod.kCV=glmnet(x,y,alpha=0, lambda = bestLambdaLOOCV) 
+coef(ridge.mod.kCV)
+min(coef(ridge.mod.kCV)) #lo stesso valore di prima
+
+
+####LASSO
+
+
+LASSO.mods.ALL=glmnet(x,y,alpha=1, lambda=NULL)
+dim(coef(LASSO.mods.ALL))
+
+plot(LASSO.mods.ALL, main="LASSO, reg. standard", xvar="lambda", label=TRUE)
+
+cv.outK10.Lasso=cv.glmnet(x,y,lambda=NULL,alpha=1, grouped=FALSE)
+plot(cv.outK10.Lasso)
+
+lambdaminL<-cv.outK10.Lasso$lambda.min
+lambdaminL
+
+
+
+LASSO.mod.KCV=glmnet(x,y, alpha=1, lambda=lambdaminL)
+coef(LASSO.mod.KCV)[,1]
+
+cv.outLOOCV.LASSO=cv.glmnet(x,y, lambda=NULL, nfolds=n, grouped=FALSE, alpha=1)
+plot(cv.outLOOCV.LASSO, main="LOOCV per dati")
+bestLambdaLOOCV.LASSO<-cv.outLOOCV.LASSO$lambda.min
+bestLambdaLOOCV.LASSO
+
+
+LASSO.mod.kCV=glmnet(x,y,alpha=1, lambda=bestLambdaLOOCV)
+coef(LASSO.mod.kCV)[,1]
+
+cbind(coef(LASSO.mod.kCV)[,1],coef(ridge.mod.kCV)[,1])
+
+
+
+#ELASTIC NET
+EN.modes.ALL<-glmnet(x,y,lambda=NULL, alpha=0.1)
+plot(EN.modes.ALL, main="EN reg stand", xvar="lambda",label=TRUE)
+
+EN.modes.ALL<-glmnet(x,y,lambda=NULL, alpha=0.5)
+plot(EN.modes.ALL, main="EN reg stand", xvar="lambda",label=TRUE)
+
+EN.modes.ALL<-glmnet(x,y,lambda=NULL, alpha=0.9)
+plot(EN.modes.ALL, main="EN reg stand", xvar="lambda",label=TRUE)
+
+
+cv.outK10.EN01=cv.glmnet(x,y,lambda=NULL, alpha=0.1,grouped=FALSE)
+plot(cv.outK10.EN01, main="EN alpha=0.1: k-fold CV per dati")
+
+bestLambda.EN01<-cv.outK10.EN01$lambda.min
+bestLambda.EN01
+
+EN01.mod.kCV=glmnet(x,y,alpha=0.1,lambda=bestLambda.EN01, grouped=FALSE)
+coef(EN01.mod.kCV)[,1]
+
+cv.outK10.EN02=cv.glmnet(x,y,lambda=NULL, alpha=0.5,grouped=FALSE)
+plot(cv.outK10.EN02, main="EN alpha=0.5: k-fold CV per dati")
+
+bestLambda.EN02<-cv.outK10.EN02$lambda.min
+bestLambda.EN02
+
+EN02.mod.kCV=glmnet(x,y,alpha=0.5,lambda=bestLambda.EN02, grouped=FALSE)
+coef(EN02.mod.kCV)[,1]
+
+
+
+cv.outK10.EN03=cv.glmnet(x,y,lambda=NULL, alpha=0.9,grouped=FALSE)
+plot(cv.outK10.EN03, main="EN alpha=0.9: k-fold CV per dati")
+
+bestLambda.EN03<-cv.outK10.EN03$lambda.min
+bestLambda.EN03
+
+EN03.mod.kCV=glmnet(x,y,alpha=0.9,lambda=bestLambda.EN03, grouped=FALSE)
+coef(EN03.mod.kCV)[,1]
+
+
+
+cbind(coef(LASSO.mod.kCV)[,1], coef(ridge.mod.kCV)[,1],coef(EN01.mod.kCV)[,1],coef(EN02.mod.kCV)[,1],
+      coef(EN03.mod.kCV)[,1])
+ 
+
+
+
+mse.minLASSO<-cv.outK10.Lasso$cvm[cv.outK10.Lasso$lambdainL==cv.outK10.Lasso$lambda.min]
+mse.minRR<-cv.outK10$cvm[cv.outK10$lambda==cv.outK10$lambda.min]
+mse.minEN01<-cv.outK10.EN01$cvm[cv.outK10.EN01$lambda==cv.outK10.EN01$lambda.min]
+mse.minEN02<-cv.outK10.EN02$cvm[cv.outK10.EN02$lambda==cv.outK10.EN02$lambda.min]
+mse.minEN03<-cv.outK10.EN03$cvm[cv.outK10.EN03$lambda==cv.outK10.EN03$lambda.min]
+
+
+cbind(mse.minLASSO,mse.minRR,mse.minEN01,mse.minEN02,mse.minEN03)
+
+min(cbind(mse.minLASSO,mse.minRR,mse.minEN01,mse.minEN02,mse.minEN03))
+
+#mse MIN con EN con alpha = 0.9
+
+
+
+#CONFRONTO COEF MSE MIN E MODELLO OLS
+cbind((coef(EN02.mod.kCV)[,1]), coef(m1))
+
+
+
